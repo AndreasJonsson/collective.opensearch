@@ -20,17 +20,17 @@ PLONE6=6.0-latest
 
 INSTANCE_YAML=instance.yaml
 
-ELASTIC_SEARCH_IMAGE=elasticsearch:7.17.7
-ELASTIC_SEARCH_CONTAINER=elastictest
+OPEN_SEARCH_IMAGE=opensearchproject/opensearch:2.12.0
+OPEN_SEARCH_CONTAINER=opensearchtest
 
 REDIS_IMAGE=redis:7.0.5
 REDIS_CONTAINER=redistest
 
-ELASTIC_SEARCH_CONTAINERS=$$(docker ps -q -a -f "name=${ELASTIC_SEARCH_CONTAINER}" | wc -l)
+OPEN_SEARCH_CONTAINERS=$$(docker ps -q -a -f "name=${OPEN_SEARCH_CONTAINER}" | wc -l)
 REDIS_CONTAINERS=$$(docker ps -q -a -f "name=${REDIS_CONTAINER}" | wc -l)
 
-# Default env for elasticsearch with redis queue
-DEFAULT_ENV_ES_REDIS=PLONE_REDIS_DSN=redis://localhost:6379/0 \
+# Default env for opensearch with redis queue
+DEFAULT_ENV_OS_REDIS=PLONE_REDIS_DSN=redis://localhost:6379/0 \
 	PLONE_BACKEND=http://localhost:8080/Plone \
 	PLONE_USERNAME=admin \
 	PLONE_PASSWORD=admin
@@ -138,33 +138,35 @@ lint-pyroma: ## validate using pyroma
 lint-zpretty: ## validate ZCML/XML using zpretty
 	$(LINT) zpretty ${CODEPATH}
 
-.PHONY: elastic
-elastic: ## Create Elastic Search container
-	@if [ $(ELASTIC_SEARCH_CONTAINERS) -eq 0 ]; then \
-		docker container create --name $(ELASTIC_SEARCH_CONTAINER) \
+.PHONY: opensearch
+opensearch: ## Create OpenSearch container
+	@if [ $(OPEN_SEARCH_CONTAINERS) -eq 0 ]; then \
+		docker container create --name $(OPEN_SEARCH_CONTAINER) \
 		-e "discovery.type=single-node" \
 		-e "cluster.name=docker-cluster" \
 		-e "http.cors.enabled=true" \
 		-e "http.cors.allow-origin=*" \
 		-e "http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization" \
 		-e "http.cors.allow-credentials=true" \
-		-e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+		-e "DISABLE_SECURITY_PLUGIN=true" \
+		-e "DISABLE_INSTALL_DEMO_CONFIG=true" \
+		-e "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" \
 		-p 9200:9200 \
-		-p 9300:9300 \
-		$(ELASTIC_SEARCH_IMAGE); \
-		docker start $(ELASTIC_SEARCH_CONTAINER); \
-		docker exec $(ELASTIC_SEARCH_CONTAINER) /bin/sh -c "bin/elasticsearch-plugin install ingest-attachment -b"; \
-		docker stop $(ELASTIC_SEARCH_CONTAINER);fi
+		-p 9600:9600 \
+		$(OPEN_SEARCH_IMAGE); \
+		docker start $(OPEN_SEARCH_CONTAINER); \
+		docker exec $(OPEN_SEARCH_CONTAINER) /bin/sh -c "bin/opensearch-plugin install ingest-attachment -b"; \
+		docker stop $(OPEN_SEARCH_CONTAINER);fi
 
-.PHONY: start-elastic
-start-elastic: elastic ## Start Elastic Search
-	@echo "$(GREEN)==> Start Elastic Search$(RESET)"
-	@docker start $(ELASTIC_SEARCH_CONTAINER)
+.PHONY: start-opensearch
+start-opensearch: opensearch ## Start OpenSearch
+	@echo "$(GREEN)==> Start OpenSearch$(RESET)"
+	@docker start $(OPEN_SEARCH_CONTAINER)
 
-.PHONY: stop-elastic
-stop-elastic: ## Stop Elastic Search
-	@echo "$(GREEN)==> Stop Elastic Search$(RESET)"
-	@docker stop $(ELASTIC_SEARCH_CONTAINER)
+.PHONY: stop-opensearch
+stop-opensearch: ## Stop OpenSearch
+	@echo "$(GREEN)==> Stop OpenSearch$(RESET)"
+	@docker stop $(OPEN_SEARCH_CONTAINER)
 
 .PHONY: redis
 redis: ## Create redis Search container
@@ -187,10 +189,10 @@ stop-redis: ## Stop redis
 
 .PHONY: test
 test: ## run tests
-	make start-elastic
+	make start-opensearch
 	make start-redis
 	PYTHONWARNINGS=ignore ./bin/zope-testrunner --auto-color --auto-progress --test-path src/
-	make stop-elastic
+	make stop-opensearch
 	make stop-redis
 
 .PHONY: start
@@ -205,10 +207,10 @@ populate: ## Populate site with wikipedia content
 start-redis-support: ## Start a Plone instance on localhost:8080
 	@echo "$(GREEN)==> Set env variables, PLONE_REDIS_DSN, PLONE_BACKEND, PLONE_USERNAME and PLONE_PASSWORD before start instance$(RESET)"
 	PYTHONWARNINGS=ignore \
-	$(DEFAULT_ENV_ES_REDIS) \
+	$(DEFAULT_ENV_OS_REDIS) \
 	./bin/runwsgi instance/etc/zope.ini
 
 
 .PHONY: worker
 worker: ## Start a worker for the redis queue
-	$(DEFAULT_ENV_ES_REDIS) ./bin/rq worker normal low --with-scheduler
+	$(DEFAULT_ENV_OS_REDIS) ./bin/rq worker normal low --with-scheduler

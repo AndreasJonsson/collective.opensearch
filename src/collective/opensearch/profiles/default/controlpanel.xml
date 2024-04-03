@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<object xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+        name="portal_controlpanel"
+        i18n:domain="plone"
+>
+  <configlet action_id="opensearch"
+             appId="opensearch"
+             category="Products"
+             condition_expr=""
+             title="OpenSearch"
+             url_expr="string:${portal_url}/@@opensearch-controlpanel"
+             visible="True"
+             i18n:attributes="title"
+  >
+    <permission>Manage portal</permission>
+  </configlet>
+</object>

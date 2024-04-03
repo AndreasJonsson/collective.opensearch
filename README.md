@@ -1,5 +1,9 @@
 <h1 align="center">collective.elasticsearch</h1>
 
+## Prologue
+
+:exclamation: This is a fork of [collective.elasticsearch](https://github.com/collective/collective.elasticsearch).  This README file and the project links have not been updated yet.
+
 <div align="center">
 
 [![PyPI](https://img.shields.io/pypi/v/collective.elasticsearch)](https://pypi.org/project/collective.elasticsearch/)

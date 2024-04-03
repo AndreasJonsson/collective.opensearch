@@ -11,9 +11,9 @@ long_description = f"""
 
 
 setup(
-    name="collective.elasticsearch",
-    version="5.0.1.dev0",
-    description="elasticsearch integration with plone",
+    name="collective.opensearch",
+    version="1.0.0",
+    description="opensearch integration with plone",
     long_description=long_description,
     long_description_content_type="text/markdown",
     # Get more from https://pypi.org/classifiers/
@@ -38,7 +38,7 @@ setup(
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    keywords="plone elasticsearch search indexing",
+    keywords="plone opensearch search indexing",
     author="Nathan Van Gheem",
     author_email="vangheem@gmail.com",
     url="https://github.com/collective/collective.elasticsearch",
@@ -56,7 +56,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "setuptools",
-        "elasticsearch==7.17.7",
+        "opensearch-py[async]==2.5.0",
         "plone.app.registry",
         "plone.api",
         "setuptools",

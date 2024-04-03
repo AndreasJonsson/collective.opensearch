@@ -9,13 +9,13 @@ services:
     volumes:
       - redis_data:/data
 
-  elasticsearch:
+  opensearch:
     build:
       context: .
-      dockerfile: docker/elasticsearch.Dockerfile
+      dockerfile: docker/opensearch.Dockerfile
     ports:
       - 9200:9200
-      - 9300:9300
+      - 9600:9600
     environment:
       - discovery.type=single-node
       - cluster.name=docker-cluster
@@ -23,9 +23,11 @@ services:
       - http.cors.allow-origin=*
       - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
       - http.cors.allow-credentials=true
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
     volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
+      - opensearch_data:/usr/share/opensearch/data
 
   worker:
     build:
@@ -50,12 +52,12 @@ services:
     - "8080:8080"
     depends_on:
       - redis
-      - elasticsearch
+      - opensearch
       - worker
     volumes:
       - plone_data:/data
 
 volumes:
   redis_data:
-  elasticsearch_data:
+  opensearch_data:
   plone_data:

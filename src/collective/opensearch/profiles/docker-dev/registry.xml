@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<registry>
+  <records interface="collective.opensearch.interfaces.IOpenSearchSettings"
+           prefix="collective.opensearch.interfaces.IOpenSearchSettings"
+  >
+    <value key="hosts">
+      <element>opensearch</element>
+    </value>
+    <value key="use_redis">True</value>
+  </records>
+</registry>

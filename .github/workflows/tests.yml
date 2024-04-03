@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.7", "3.8", "3.9", "3.10"]
+        python: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         plone: ["6.0-latest", "5.2-latest"]
         exclude:
           - plone: "5.2-latest"
@@ -31,22 +31,24 @@ jobs:
       # git checkout
       - uses: actions/checkout@v2
 
-      - name: Setup elasticsearch docker container with ingest attachment plugin
+      - name: Setup opensearch docker container with ingest attachment plugin
         run: |
-          docker container create --name elastictest \
+          docker container create --name opensearchtest \
           -e "discovery.type=single-node" \
           -e "cluster.name=docker-cluster" \
           -e "http.cors.enabled=true" \
           -e "http.cors.allow-origin=*" \
           -e "http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization" \
           -e "http.cors.allow-credentials=true" \
-          -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" \
+          -e "DISABLE_SECURITY_PLUGIN=true" \
+          -e "DISABLE_INSTALL_DEMO_CONFIG=true" \
+          -e "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" \
           -p 9200:9200 \
-          -p 9300:9300 \
-          elasticsearch:7.17.7; \
-          docker start elastictest; \
-          docker exec elastictest /bin/sh -c "bin/elasticsearch-plugin install ingest-attachment -b"; \
-          docker restart elastictest
+          -p 9600:9600 \
+          opensearchproject/opensearch:2.12.0; \
+          docker start opensearchtest; \
+          docker exec opensearchtest /bin/sh -c "bin/opensearch-plugin install ingest-attachment -b"; \
+          docker restart opensearchtest
 
       - name: Setup Plone ${{ matrix.plone }} with Python ${{ matrix.python }}
         id: setup

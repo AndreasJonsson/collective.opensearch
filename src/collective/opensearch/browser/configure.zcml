@@ -1,0 +1,45 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
+    i18n_domain="collective.opensearch"
+    >
+
+  <include package="plone.app.layout" />
+
+  <browser:page
+      name="opensearch-controlpanel"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      class=".controlpanel.OpenSearchControlPanelView"
+      permission="cmf.ManagePortal"
+      layer="..interfaces.IOpenSearchLayer"
+      />
+
+  <browser:page
+      name="opensearch-convert"
+      for="Products.CMFPlone.interfaces.basetool.IPloneCatalogTool"
+      class=".utilviews.Utils"
+      attribute="convert"
+      permission="cmf.ManagePortal"
+      layer="..interfaces.IOpenSearchLayer"
+      />
+
+  <browser:page
+      name="opensearch-rebuild"
+      for="Products.CMFPlone.interfaces.basetool.IPloneCatalogTool"
+      class=".utilviews.Utils"
+      attribute="rebuild"
+      permission="cmf.ManagePortal"
+      layer="..interfaces.IOpenSearchLayer"
+      />
+
+  <browser:page
+      name="opensearch-synchronize"
+      for="Products.CMFPlone.interfaces.basetool.IPloneCatalogTool"
+      class=".utilviews.Utils"
+      attribute="synchronize"
+      permission="cmf.ManagePortal"
+      layer="..interfaces.IOpenSearchLayer"
+      />
+
+</configure>
